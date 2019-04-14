@@ -19,15 +19,16 @@ def return_word_forms(words):
         {'loct'},
         {'loct', 'plur'}
     ]
-    
+
     for word in words.split():
         word = morph.parse(word)[0]
         for form in range(12):
-            word_forms[form] += word.inflect(cases[form])[0] + " "        
-    
+            word_forms[form] += word.inflect(cases[form])[0] + " "
+
     return [word_form.strip() for word_form in word_forms]
 
 
-print(return_word_forms("Суп"))
-print(return_word_forms("Бегающий слава"))
-print(return_word_forms("Суп махровый"))
+if __name__ == '__main__':
+    print(return_word_forms("Суп"))
+    print(return_word_forms("Бегающий слава"))
+    print(return_word_forms("Суп махровый"))

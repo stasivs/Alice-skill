@@ -6,7 +6,7 @@ from random import choice
 from flask import Flask, request
 
 from morph import morphological_analysis
-from word_forms import func
+from word_forms import return_word_forms
 
 app = Flask(__name__)
 
@@ -79,7 +79,6 @@ def handle_dialog(req, res):
             'разбор',
             'морфология'
         ]:
-            print('YES')
             res['response']['text'] = '\n'.join(
                 '{} : {}'.format(key, value) for key, value in morphological_analysis(
                     req['request']["original_utterance"].split()[
@@ -106,7 +105,7 @@ def handle_dialog(req, res):
             'форму'
         ]:
             res['response']['text'] = '\n'.join(
-                i for i in func(req['request']["original_utterance"].split()[-1]))  # Функция для формы слова
+                i for i in return_word_forms(req['request']["original_utterance"].split()[-1]))  # Функция для формы слова
             res['response']['end_session'] = True
             return
 

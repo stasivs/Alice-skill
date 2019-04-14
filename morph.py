@@ -130,9 +130,10 @@ def morphological_analysis(word):
     return word_params
 
 
-print(morphological_analysis("Копье"))
-print(morphological_analysis("Быстро"))
-print(morphological_analysis("Бежать"))
-print(morphological_analysis("Красивый"))
-print(morphological_analysis("Бегающий"))
-print(morphological_analysis("Лежа"))
+if __name__ == '__main__':
+    print(morphological_analysis("Копье"))
+    print(morphological_analysis("Быстро"))
+    print(morphological_analysis("Бежать"))
+    print(morphological_analysis("Красивый"))
+    print(morphological_analysis("Бегающий"))
+    print(morphological_analysis("Лежа"))
