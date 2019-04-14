@@ -1,8 +1,12 @@
 # импортируем библиотеки
-from flask import Flask, request
+import json
 import logging
 from random import choice
-import json
+
+from flask import Flask, request
+
+from morph import morphological_analysis
+from word_forms import func
 
 app = Flask(__name__)
 
@@ -48,7 +52,6 @@ def main():
 
 def handle_dialog(req, res):
     user_id = req['session']['user_id']
-    mode = ''
 
     answered_word = get_answered_word(req)
     if len(answered_word) == 1:
@@ -59,7 +62,7 @@ def handle_dialog(req, res):
             'suggests': [
                 "Морфологический разбор слова",
                 "Орфографический диктант",
-                "Форма слова"
+                "Форма слова",
             ]
         }
         res['response']['text'] = choice(FIRST_ANSWER_SENTENSES)
@@ -68,37 +71,44 @@ def handle_dialog(req, res):
 
     #  Обработка ответов:
     #  -На морфологический разбор слова
-    if req['request']["original_utterance"].lower() in [
-        'морфология слова',
-        'морфологический разбор слова',
-        'разбор слова',
-        'разбор'
-    ]:
-        res['response']['text'] = '\n'.join(
-            '{} : {}'.format() for i in [])  # Функция для наморфологического разбора слова
-        res['response']['end_session'] = True
-        mode = ''
-        return
+    for word in req['request']["original_utterance"].lower().split():
+        if word in [
+            'морфология слова',
+            'морфологический разбор слова',
+            'разбор слова',
+            'разбор',
+            'морфология'
+        ]:
+            print('YES')
+            res['response']['text'] = '\n'.join(
+                '{} : {}'.format(key, value) for key, value in morphological_analysis(
+                    req['request']["original_utterance"].split()[
+                        -1]).items())  # Функция для наморфологического разбора слова
+            res['response']['end_session'] = True
+            return
 
     #  -На диктант
-    if req['request']["original_utterance"].lower() in [
-        'диктант',
-        'орфографический диктант',
-        'орфография'
-    ]:
-        res['response']['text'] = '<>'  # Функция для диктанта
-        res['response']['end_session'] = False
-        return
+    for word in req['request']["original_utterance"].lower().split():
+        if word in [
+            'диктант',
+            'орфографический диктант',
+            'орфография'
+        ]:
+            res['response']['text'] = '<>'  # Функция для диктанта
+            res['response']['end_session'] = False
+            return
 
     #  -На форму слова
-    if req['request']["original_utterance"].lower() in [
-        'форма слова',
-        'форма',
-        'форму'
-    ]:
-        res['response']['text'] = '<>'  # Функция для формы слова
-        res['response']['end_session'] = False
-        return
+    for word in req['request']["original_utterance"].lower().split():
+        if word in [
+            'форма слова',
+            'форма',
+            'форму'
+        ]:
+            res['response']['text'] = '\n'.join(
+                i for i in func(req['request']["original_utterance"].split()[-1]))  # Функция для формы слова
+            res['response']['end_session'] = True
+            return
 
     #  -Прощание
     if req['request']["original_utterance"].lower() in [
@@ -126,15 +136,8 @@ def get_suggests(user_id):
     session['suggests'] = session['suggests']
     sessionStorage[user_id] = session
 
-    if len(suggests) < 2:
-        suggests.append({
-            "title": "Ладно",
-            "url": "https://market.yandex.ru/search?text=слон",
-            "hide": True
-        })
-
     return suggests
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

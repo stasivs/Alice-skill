@@ -21,7 +21,7 @@ def func(words):
         a[11] += word.inflect({'loct', 'plur'})[0] + " "
     return [i.strip() for i in a]
 
-
-print(func("Суп"))
-print(func("Бегающий слава"))
-print(func("Суп махровый"))
+if __name__ == '__main__':
+    print(func("Суп"))
+    print(func("Бегающий слава"))
+    print(func("Суп махровый"))

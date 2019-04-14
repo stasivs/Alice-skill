@@ -55,7 +55,6 @@ def key_translate(key):
             'tense': 'Время',
             'voice': 'Залог',
 
-
             }
     return keys[key]
 
@@ -98,14 +97,13 @@ def morphological_analysis(word):
 
             trans[key_translate(key)] = morph.lat2cyr(word_params[key])
 
-    print(word_params)
-    print(trans)
-    print()
+    return trans
 
 
-morphological_analysis("Копье")
-morphological_analysis("Быстро")
-morphological_analysis("Бежать")
-morphological_analysis("Красивый")
-morphological_analysis("Бегающий")
-morphological_analysis("Лежа")
+if __name__ == '__main__':
+    morphological_analysis("Копье")
+    morphological_analysis("Быстро")
+    morphological_analysis("Бежать")
+    morphological_analysis("Красивый")
+    morphological_analysis("Бегающий")
+    morphological_analysis("Лежа")
