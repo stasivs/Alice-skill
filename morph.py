@@ -50,6 +50,10 @@ def key_translate(key):
             'real': 'вещественное число',
             'ROMN': 'римское число',
             'UNKN': 'неизвестно',
+            'aspect': 'Вид',
+            'transitivity': 'Переходность',
+            'tense': 'Время',
+            'voice': 'Залог',
 
 
             }
@@ -91,7 +95,9 @@ def morphological_analysis(word):
         if value is None:
             del word_params[key]
         else:
-            trans[key] = morph.lat2cyr(word_params[key])
+
+            trans[key_translate(key)] = morph.lat2cyr(word_params[key])
+
     print(word_params)
     print(trans)
     print()
