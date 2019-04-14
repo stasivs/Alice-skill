@@ -28,6 +28,7 @@ def return_word_forms(words):
     return [word_form.strip() for word_form in word_forms]
 
 
-print(return_word_forms("Суп"))
-print(return_word_forms("Бегающий слава"))
-print(return_word_forms("Суп махровый"))
+if __name__ == "__main__":
+    print(return_word_forms("Суп"))
+    print(return_word_forms("Бегающий слава"))
+    print(return_word_forms("Суп махровый"))

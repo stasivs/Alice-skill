@@ -3,7 +3,7 @@ import pymorphy2
 morph = pymorphy2.MorphAnalyzer()
 
 
-def key_translate(key):
+def key_translate(tag):
     keys = {
         'NOUN': 'Существительное',
         'ADJF': 'Прилагательное(полное)',
@@ -89,7 +89,7 @@ def key_translate(key):
         'Litr': 'литературный вариант',
         'Erro': 'опечатка',
     }
-    return keys[key]
+    return keys[tag]
 
 
 def morphological_analysis(word):
@@ -122,17 +122,18 @@ def morphological_analysis(word):
     word_params["voice"] = morph_tag.voice
 
     for key, value in list(word_params.items())[1:]:
-        if value is None:
-            del word_params[key]
-        else:
-            word_params[key] = key_translate(value).capitalize()
+        if value is not None:
+            word_params[key_translate(key).capitalize()] = key_translate(value).capitalize()
+        del word_params[key]
+
     word_params["normal_form"] = word_params["normal_form"].capitalize()
     return word_params
 
 
-print(morphological_analysis("Копье"))
-print(morphological_analysis("Быстро"))
-print(morphological_analysis("Бежать"))
-print(morphological_analysis("Красивый"))
-print(morphological_analysis("Бегающий"))
-print(morphological_analysis("Лежа"))
+if __name__ == "__main__":
+    print(morphological_analysis("Копье"))
+    print(morphological_analysis("Быстро"))
+    print(morphological_analysis("Бежать"))
+    print(morphological_analysis("Красивый"))
+    print(morphological_analysis("Бегающий"))
+    print(morphological_analysis("Лежа"))
