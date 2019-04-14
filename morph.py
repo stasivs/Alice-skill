@@ -3,6 +3,27 @@ import pymorphy2
 morph = pymorphy2.MorphAnalyzer()
 
 
+def key_translate(key):
+    keys = {'NOUN': 'Существительное',
+            'ADJF': 'Прилагательное(полное)',
+            'ADJS': 'Прилагательное(краткое)',
+            'COMP': 'Компраматив',
+            'VERB': 'Глагол(личная форма)',
+            'INFN': 'Глагол(инфинитив)',
+            'PRTF': 'Причастие(полное)',
+            'PRTS': 'Причастие(краткое)',
+            'GRND': 'Деепричастие',
+            'NUMR': 'Числительное',
+            'ADVB': 'Наречие',
+            'NPRO': 'Местоимение',
+            'PRED': 'Предикатив',
+            'PREP': 'Предлог',
+            'CONJ': 'Союз',
+            'PRCL': 'Частица',
+            'INTJ': 'Междометие',
+            }
+    return keys[key]
+
 def morphological_analysis(word):
     word_params = {}
     morph_word = morph.parse(word)[0]
@@ -19,7 +40,7 @@ def morphological_analysis(word):
     word_params["case"] = morph_tag.case
     # Род
     word_params["gender"] = morph_tag.gender
-    # Наклонение
+    # Наклонение3
     word_params["mood"] = morph_tag.mood
     # Число
     word_params["number"] = morph_tag.number
