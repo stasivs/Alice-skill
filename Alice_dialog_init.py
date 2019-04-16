@@ -19,6 +19,11 @@ FIRST_ANSWER_SENTENSES = ['Привет! Давай займёмся русск�
                           'Гой еси, добрый молодец! Великий и могучий не ждёт!',
                           'Мир вашему дому! Желаете изучать русский?']
 
+ENDING_DIALOG_ANSWERS = ['Что-нибудь ещё?',
+                         'Может хотите ещё что-то разобрать?',
+                         'Какие ещё услуги вас интересуют?',
+                         'Бип-бип, жду приказаний, повелитель. Ха-ха']
+
 
 def get_entities(json):
     entities = json['request']['entities']
@@ -34,7 +39,6 @@ def get_answered_word(req):
 @app.route('/post', methods=['POST'])
 def main():
     logging.info('Request: %r', request.json)
-
 
     response = {
         'session': request.json['session'],
@@ -72,15 +76,16 @@ def handle_dialog(req, res):
 
     #  Обработка ответов:
     #  -На морфологический разбор слова
-    logging.info(curr_func)
-    logging.info(req)
+    logging.info(req['request']["original_utterance"])
+    logging.info(req['request']['command'])
     for word in req['request']["original_utterance"].lower().split():
         if curr_func == 'Морфологический разбор слова':
             res['response']['text'] = '\n'.join(
                 '{} : {}'.format(key, value) for key, value in morphological_analysis(
                     req['request']["original_utterance"].split()[
-                        -1]).items())  # Функция для наморфологического разбора слова
+                        -1]).items()) + '\n\n' + choice(ENDING_DIALOG_ANSWERS) # Функция для наморфологического разбора слова
             res['response']['end_session'] = True
+            res['response']['buttons'] = get_suggests(user_id)
             curr_func = ''
             return
         if word in [
@@ -92,11 +97,11 @@ def handle_dialog(req, res):
         ]:
             curr_func = 'Морфологический разбор слова'
 
-            res['response']['text'] = 'Введите, пожалуйста, слово для разбора'  # Функция для наморфологического разбора слова
+            res['response'][
+                'text'] = 'Введите, пожалуйста, слово для разбора'  # Функция для наморфологического разбора слова
             res['response']['end_session'] = False
             logging.info(res)
             return
-
 
     #  -На диктант
     logging.info(req)
@@ -112,14 +117,24 @@ def handle_dialog(req, res):
 
     #  -На форму слова
     for word in req['request']["original_utterance"].lower().split():
+        if curr_func == 'Форма слова':
+            res['response']['text'] = '\n'.join(
+                i for i in
+                return_word_forms(req['request']["original_utterance"].split()[-1])) + '\n\n' + choice(ENDING_DIALOG_ANSWERS)
+            res['response']['end_session'] = True
+            res['response']['buttons'] = get_suggests(user_id)
+            curr_func = ''
+            return
         if word in [
             'форма слова',
             'форма',
             'форму'
         ]:
-            res['response']['text'] = '\n'.join(
-                i for i in return_word_forms(req['request']["original_utterance"].split()[-1]))  # Функция для формы слова
-            res['response']['end_session'] = True
+            curr_func = 'Форма слова'
+            res['response'][
+                'text'] = 'Введите, пожалуйста, слово для анализа'  # Функция для формы слова
+            res['response']['end_session'] = False
+            logging.info(res)
             return
 
     #  -Прощание
@@ -139,6 +154,7 @@ def handle_dialog(req, res):
     res['response']['text'] = 'Простите, я вас не поняла, повторите, пожалуйста.'
     res['response']['end_session'] = False
     return
+
 
 def get_suggests(user_id):
     session = sessionStorage[user_id]
