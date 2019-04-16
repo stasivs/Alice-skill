@@ -126,7 +126,8 @@ def morphological_analysis(word):
             word_params[key_translate(key).capitalize()] = key_translate(value).capitalize()
         del word_params[key]
 
-    word_params["normal_form"] = word_params["normal_form"].capitalize()
+    word_params[key_translate("normal_form")] = word_params["normal_form"].capitalize()
+    del word_params["normal_form"]
     return word_params
 
 
