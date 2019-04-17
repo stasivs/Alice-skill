@@ -1,6 +1,8 @@
 import random
 
-from Dictionary import words
+with open("Dictionary.txt", "rt", encoding="utf8") as file:
+    words = file.read().split()
+    words[0] = words[0][1:]
 
 
 class Dictation:
@@ -16,6 +18,8 @@ class Dictation:
     def generate_word(self):
         word = random.choice(words)
         num_of_letter = random.choice(range(1, len(word) - 1))
+        while word[num_of_letter] in "- ":
+            num_of_letter = random.choice(range(1, len(word) - 1))
         self.words_without_letter.append(word[:num_of_letter] + "_" + word[num_of_letter + 1:])
         self.letters.append(word[num_of_letter])
 
