@@ -23,6 +23,11 @@ class Dictation:
         self.words_without_letter.append(word[:num_of_letter] + "_" + word[num_of_letter + 1:])
         self.letters.append(word[num_of_letter])
 
+    def clear(self):
+        self.words_without_letter = []
+        self.letters = []
+        self.counter = 0
+
 
 if __name__ == "__main__":
     dict = Dictation()
