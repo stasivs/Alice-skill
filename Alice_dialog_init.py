@@ -83,7 +83,8 @@ def handle_dialog(req, res):
             res['response']['text'] = '\n'.join(
                 '{} : {}'.format(key, value) for key, value in morphological_analysis(
                     req['request']["original_utterance"].split()[
-                        -1]).items()) + '\n\n' + choice(ENDING_DIALOG_ANSWERS) # Функция для наморфологического разбора слова
+                        -1]).items()) + '\n\n' + choice(
+                ENDING_DIALOG_ANSWERS)  # Функция для наморфологического разбора слова
             res['response']['end_session'] = True
             res['response']['buttons'] = get_suggests(user_id)
             curr_func = ''
@@ -106,12 +107,19 @@ def handle_dialog(req, res):
     #  -На диктант
     logging.info(req)
     for word in req['request']["original_utterance"].lower().split():
+        if curr_func == 'Диктант':
+            answer = req['request']['original_utterance']
+            curr_func = ''
+            return
         if word in [
             'диктант',
             'орфографический диктант',
             'орфография'
         ]:
-            res['response']['text'] = '<>'  # Функция для диктанта
+            curr_func = 'Диктант'
+            res['response'][
+                'text'] = 'Правила такие:\n Я выводжу вам несколько слов с пропущенными буквами,\n а вы напишете правильные буквы через пробел.\n'  # Функция для диктанта
+            # res['response']['text'] += <Функция_формирования слов>
             res['response']['end_session'] = False
             return
 
@@ -120,7 +128,8 @@ def handle_dialog(req, res):
         if curr_func == 'Форма слова':
             res['response']['text'] = '\n'.join(
                 i for i in
-                return_word_forms(req['request']["original_utterance"].split()[-1])) + '\n\n' + choice(ENDING_DIALOG_ANSWERS)
+                return_word_forms(req['request']["original_utterance"].split()[-1])) + '\n\n' + choice(
+                ENDING_DIALOG_ANSWERS)
             res['response']['end_session'] = True
             res['response']['buttons'] = get_suggests(user_id)
             curr_func = ''
