@@ -26,14 +26,15 @@ def return_word_forms(words):
             word_forms[form] += key_translate(tag) + " "
         word_forms[form] = word_forms[form].strip().capitalize() + ": "
 
-    for word in words.split():
-        word = morph.parse(word)[0]
-        if word.tag.POS != "NOUN":
-            return ["Было введено не существительное"]
-        for form in range(12):
-            word_forms[form] += word.inflect(cases[form])[0] + " "
-    
-    return [word_form.strip() for word_form in word_forms]
+    try:
+        for word in words.split():
+            word = morph.parse(word)[0]
+            for form in range(12):
+                word_forms[form] += word.inflect(cases[form])[0] + " "
+
+        return [word_form.strip() for word_form in word_forms]
+    except Exception:
+        return ["Было введено несклоняемое слово"]
 
 
 if __name__ == "__main__":

@@ -109,46 +109,12 @@ def handle_dialog(req, res):
     logging.info(req)
     for word in req['request']["original_utterance"].lower().split():
         if curr_func == 'Диктант':
-
             answer = req['request']['original_utterance'].lower().split()
-            results = []
-            right = dictation.words_without_letter.copy()
-
-            for i in range(len(answer)):
-                results.append(answer[i] == dictation.letters[i])
-
-            for i in range(len(results)):
-                if not results[i]:
-                    right[i] = right[i].replace('_', dictation.letters[i])
-
-
-            if all(results):
-                res['response']['text'] = 'Прекрасно, вы не сделали ни одной ошибки!'
-                res['response']['end_session'] = True
-                res['response']['buttons'] = get_suggests(user_id)
-                curr_func = ''
-                return
-
-            if any(results):
-                res['response'][
-                    'text'] = 'Что ж, вы сделали несколько ошибок. Продолжайте работать, и вас будет ждать успех.' + '\n\n'
-                res['response']['text'] += 'Вот слова, в которых вы допустили ошибки:\n'
-                res['response']['text'] += '\n'.join(right[i] for i in range(len(right)) if not results[i])
-                res['response']['end_session'] = True
-                res['response']['buttons'] = get_suggests(user_id)
-                curr_func = ''
-                return
-
-
-            if not all(results):
-                res['response']['text'] = 'К сожалению, вы ошиблись везде, но не стоит отчаиваться\n'
-                res['response']['text'] += 'Я уверна, что немного потрудившись, вы улучшите свои результаты\n.'
-                res['response']['text'] += 'Постарайтесь запомнить как пишутся эти слова:\n'
-                res['response']['text'] += '\n'.join(right[i] for i in range(len(right)))
-                res['response']['end_session'] = True
-                res['response']['buttons'] = get_suggests(user_id)
-                curr_func = ''
-                return
+            res['response']['text'] = dictation.result(answer)
+            res['response']['end_session'] = True
+            res['response']['buttons'] = get_suggests(user_id)
+            curr_func = ''
+            return
 
         if word in [
             'диктант',
@@ -161,7 +127,7 @@ def handle_dialog(req, res):
             dictation.clear()
             for i in range(randint(2, 6)):
                 dictation.generate_word()
-            res['response']['text'] += '\n'.join(i for i in dictation.words_without_letter)
+            res['response']['text'] += '\n'.join([str(i) for i in dictation.words_without_letter])
             res['response']['end_session'] = False
             return
 
