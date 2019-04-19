@@ -7,6 +7,7 @@ with open("Dictionary.txt", "rt", encoding="utf8") as file:
 
 class Dictation:
     def __init__(self):
+        self.words = []
         self.words_without_letter = []
         self.letters = []
         self.counter = 0

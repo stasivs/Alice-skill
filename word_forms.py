@@ -1,7 +1,5 @@
 from morph import *
 
-morph = pymorphy2.MorphAnalyzer()
-
 
 def return_word_forms(words):
     word_forms = [""] * 12
