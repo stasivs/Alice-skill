@@ -121,14 +121,17 @@ def morphological_analysis(word):
     # Залог
     word_params["voice"] = morph_tag.voice
 
-    for key, value in list(word_params.items())[1:]:
-        if value is not None:
-            word_params[key_translate(key).capitalize()] = key_translate(value).capitalize()
-        del word_params[key]
+    try:
+        for key, value in list(word_params.items())[1:]:
+            if value is not None:
+                word_params[key_translate(key).capitalize()] = key_translate(value).capitalize()
+            del word_params[key]
 
-    word_params[key_translate("normal_form")] = word_params["normal_form"].capitalize()
-    del word_params["normal_form"]
-    return word_params
+        word_params[key_translate("normal_form")] = word_params["normal_form"].capitalize()
+        del word_params["normal_form"]
+        return word_params
+    except Exception:
+        return {"Ошибка": "Невозможно выполнить морфологический разбор данного слова"}
 
 
 if __name__ == "__main__":

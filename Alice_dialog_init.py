@@ -54,6 +54,43 @@ def main():
 
 def handle_dialog(req, res):
     global curr_func
+    functions = ["Морфологический разбор", "Диктант", "Форма слова"]
+
+    # Слова для морфологического разбора
+    init_morph_words = [
+        'морфология слова',
+        'морфологический разбор слова',
+        'разбор слова',
+        'разбор',
+        'морфология'
+    ]
+
+    # Слова для начала диктанта
+    init_dictantion_words = [
+        'диктант',
+        'орфографический диктант',
+        'орфография'
+    ]
+
+    # Слова для начала спряжения
+    init_forms_words = [
+        'форма слова',
+        'форма',
+        'форму'
+    ]
+
+    # Слова для конца диалога
+    end_words = [
+        'спасибо нет',
+        'спасибо не надо',
+        'не надо',
+        'нет',
+        'отстань',
+        'пока',
+        'досвидания',
+        'стоп'
+    ]
+
     user_id = req['session']['user_id']
     answered_word = get_answered_word(req)
     if len(answered_word) == 1:
@@ -72,131 +109,79 @@ def handle_dialog(req, res):
         return
 
     #  Обработка ответов:
-    #  -На морфологический разбор слова
+    #  - На морфологический разбор слова
     logging.info(req['request']["original_utterance"])
     logging.info(req['request']['command'])
-    for word in req['request']["original_utterance"].lower().split():
-        if curr_func == 'Морфологический разбор слова':
-            res['response']['text'] = '\n'.join(
-                '{} : {}'.format(key, value) for key, value in morphological_analysis(
-                    req['request']["original_utterance"].split()[
-                        -1]).items()) + '\n\n' + choice(ENDING_DIALOG_ANSWERS) # Функция для наморфологического разбора слова
-            res['response']['end_session'] = True
-            res['response']['buttons'] = get_suggests(user_id)
-            curr_func = ''
-            return
-        if word in [
-            'морфология слова',
-            'морфологический разбор слова',
-            'разбор слова',
-            'разбор',
-            'морфология'
-        ]:
-            curr_func = 'Морфологический разбор слова'
 
-            res['response'][
-                'text'] = 'Введите, пожалуйста, слово для разбора'  # Функция для наморфологического разбора слова
-            res['response']['end_session'] = False
-            logging.info(res)
-            return
+    text = req['request']['original_utterance'].lower()
 
-    #  -На диктант
-    logging.info(req)
-    for word in req['request']["original_utterance"].lower().split():
-        if curr_func == 'Диктант':
+    if curr_func == functions[0]:
+        res['response']['text'] = '\n'.join(
+            '{} : {}'.format(key, value) for key, value in morphological_analysis(
+                req['request']["original_utterance"].split()[
+                    -1]).items()) + '\n\n' + choice(
+            ENDING_DIALOG_ANSWERS)  # Функция для наморфологического разбора слова
+        res['response']['end_session'] = True
+        res['response']['buttons'] = get_suggests(user_id)
+        curr_func = ''
+        return
 
-            answer = req['request']['original_utterance'].lower().split()
-            results = []
-            right = dictation.words_without_letter.copy()
+    if curr_func == functions[1]:
+        answer = req['request']['original_utterance'].lower().split()
+        res['response']['text'] = dictation.result(answer)
+        res['response']['end_session'] = True
+        res['response']['buttons'] = get_suggests(user_id)
+        curr_func = ''
+        return
 
-            for i in range(len(answer)):
-                results.append(answer[i] == dictation.letters[i])
+    if curr_func == functions[2]:
+        res['response']['text'] = '\n'.join(
+            i for i in
+            return_word_forms(req['request']["original_utterance"].split()[-1])) + '\n\n' + choice(
+            ENDING_DIALOG_ANSWERS)
+        res['response']['end_session'] = True
+        res['response']['buttons'] = get_suggests(user_id)
+        curr_func = ''
+        return
 
-            for i in range(len(results)):
-                if not results[i]:
-                    right[i] = right[i].replace('_', dictation.letters[i])
+    if text in init_morph_words:
+        curr_func = functions[0]
+        res['response']['text'] = 'Введите, пожалуйста, слово для разбора'  # Функция для формы слова
+        res['response']['end_session'] = False
+        logging.info(res)
+        return
 
+    # Обработка ответов:
+    # - На диктант
+    if text in init_dictantion_words:
+        curr_func = functions[1]
+        res['response']['text'] = 'Правила такие:\n Я выводжу вам несколько слов с пропущенными буквами,\n ' \
+                                  'а вы напишете правильные буквы через пробел:\n'  # Функция для диктанта  # Функция для формы слова
+        dictation.clear()
+        for i in range(randint(2, 6)):
+            dictation.generate_word()
+        res['response']['text'] += '\n'.join([str(i) for i in dictation.words_without_letter])
+        res['response']['end_session'] = False
+        logging.info(res)
+        return
 
-            if all(results):
-                res['response']['text'] = 'Прекрасно, вы не сделали ни одной ошибки!'
-                res['response']['end_session'] = True
-                res['response']['buttons'] = get_suggests(user_id)
-                curr_func = ''
-                return
-
-            if any(results):
-                res['response'][
-                    'text'] = 'Что ж, вы сделали несколько ошибок. Продолжайте работать, и вас будет ждать успех.' + '\n\n'
-                res['response']['text'] += 'Вот слова, в которых вы допустили ошибки:\n'
-                res['response']['text'] += '\n'.join(right[i] for i in range(len(right)) if not results[i])
-                res['response']['end_session'] = True
-                res['response']['buttons'] = get_suggests(user_id)
-                curr_func = ''
-                return
-
-
-            if not all(results):
-                res['response']['text'] = 'К сожалению, вы ошиблись везде, но не стоит отчаиваться\n'
-                res['response']['text'] += 'Я уверна, что немного потрудившись, вы улучшите свои результаты\n.'
-                res['response']['text'] += 'Постарайтесь запомнить как пишутся эти слова:\n'
-                res['response']['text'] += '\n'.join(right[i] for i in range(len(right)))
-                res['response']['end_session'] = True
-                res['response']['buttons'] = get_suggests(user_id)
-                curr_func = ''
-                return
-
-        if word in [
-            'диктант',
-            'орфографический диктант',
-            'орфография'
-        ]:
-            curr_func = 'Диктант'
-            res['response'][
-                'text'] = 'Правила такие:\n Я выводжу вам несколько слов с пропущенными буквами,\n а вы напишете правильные буквы через пробел:\n'  # Функция для диктанта
-            dictation.clear()
-            for i in range(randint(2, 6)):
-                dictation.generate_word()
-            res['response']['text'] += '\n'.join(i for i in dictation.words_without_letter)
-            res['response']['end_session'] = False
-            return
-
-    #  -На форму слова
-    for word in req['request']["original_utterance"].lower().split():
-        if curr_func == 'Форма слова':
-            res['response']['text'] = '\n'.join(
-                i for i in
-                return_word_forms(req['request']["original_utterance"].split()[-1])) + '\n\n' + choice(ENDING_DIALOG_ANSWERS)
-            res['response']['end_session'] = True
-            res['response']['buttons'] = get_suggests(user_id)
-            curr_func = ''
-            return
-        if word in [
-            'форма слова',
-            'форма',
-            'форму'
-        ]:
-            curr_func = 'Форма слова'
-            res['response'][
-                'text'] = 'Введите, пожалуйста, слово для анализа'  # Функция для формы слова
-            res['response']['end_session'] = False
-            logging.info(res)
-            return
+    # Обработка ответов:
+    # - На формы слова
+    if text in init_forms_words:
+        curr_func = functions[2]
+        res['response']['text'] = 'Введите, пожалуйста, слово для анализа'  # Функция для формы слова
+        res['response']['end_session'] = False
+        logging.info(res)
+        return
 
     #  -Прощание
-    if req['request']["original_utterance"].lower() in [
-        'спасибо нет',
-        'спасибо не надо',
-        'не надо',
-        'нет',
-        'отстань',
-        'пока',
-        'досвидания',
-    ]:
+    if text in end_words:
         res['response']['text'] = 'Хорошего вам дня!'  # Завершение диалога
         res['response']['end_session'] = True
         return
 
     res['response']['text'] = 'Простите, я вас не поняла, повторите, пожалуйста.'
+    res['response']['buttons'] = get_suggests(user_id)
     res['response']['end_session'] = False
     return
 
