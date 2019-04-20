@@ -93,6 +93,7 @@ def handle_dialog(req, res):
         'отстань',
         'пока',
         'досвидания',
+        'стоп'
     ]
 
     user_id = req['session']['user_id']
@@ -118,6 +119,35 @@ def handle_dialog(req, res):
     logging.info(req['request']['command'])
 
     text = req['request']['original_utterance'].lower()
+
+    if curr_func == functions[0]:
+        res['response']['text'] = '\n'.join(
+            '{} : {}'.format(key, value) for key, value in morphological_analysis(
+                req['request']["original_utterance"].split()[
+                    -1]).items()) + '\n\n' + choice(
+            ENDING_DIALOG_ANSWERS)  # Функция для наморфологического разбора слова
+        res['response']['end_session'] = True
+        res['response']['buttons'] = get_suggests(user_id)
+        curr_func = ''
+        return
+
+    if curr_func == functions[1]:
+        answer = req['request']['original_utterance'].lower().split()
+        res['response']['text'] = dictation.result(answer)
+        res['response']['end_session'] = True
+        res['response']['buttons'] = get_suggests(user_id)
+        curr_func = ''
+        return
+
+    if curr_func == functions[2]:
+        res['response']['text'] = '\n'.join(
+            i for i in
+            return_word_forms(req['request']["original_utterance"].split()[-1])) + '\n\n' + choice(
+            ENDING_DIALOG_ANSWERS)
+        res['response']['end_session'] = True
+        res['response']['buttons'] = get_suggests(user_id)
+        curr_func = ''
+        return
 
     if text in init_morph_words:
         curr_func = functions[0]
@@ -155,36 +185,8 @@ def handle_dialog(req, res):
         res['response']['end_session'] = True
         return
 
-    if curr_func == functions[0]:
-        res['response']['text'] = '\n'.join(
-            '{} : {}'.format(key, value) for key, value in morphological_analysis(
-                req['request']["original_utterance"].split()[
-                    -1]).items()) + '\n\n' + choice(
-            ENDING_DIALOG_ANSWERS)  # Функция для наморфологического разбора слова
-        res['response']['end_session'] = True
-        res['response']['buttons'] = get_suggests(user_id)
-        curr_func = ''
-        return
-
-    if curr_func == functions[1]:
-        answer = req['request']['original_utterance'].lower().split()
-        res['response']['text'] = dictation.result(answer)
-        res['response']['end_session'] = True
-        res['response']['buttons'] = get_suggests(user_id)
-        curr_func = ''
-        return
-
-    if curr_func == functions[2]:
-        res['response']['text'] = '\n'.join(
-            i for i in
-            return_word_forms(req['request']["original_utterance"].split()[-1])) + '\n\n' + choice(
-            ENDING_DIALOG_ANSWERS)
-        res['response']['end_session'] = True
-        res['response']['buttons'] = get_suggests(user_id)
-        curr_func = ''
-        return
-
     res['response']['text'] = 'Простите, я вас не поняла, повторите, пожалуйста.'
+    res['response']['buttons'] = get_suggests(user_id)
     res['response']['end_session'] = False
     return
 
