@@ -1,7 +1,7 @@
 import random
 
 with open("Dictionary.txt", "rt", encoding="utf8") as file:
-    words = file.read().split()
+    words = file.read().split("\n")
     words[0] = words[0][1:]
 
 
