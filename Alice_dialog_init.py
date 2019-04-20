@@ -27,11 +27,6 @@ ENDING_DIALOG_ANSWERS = ['Что-нибудь ещё?',
                          'Бип-бип, жду приказаний, повелитель. Ха-ха']
 
 
-def get_entities(json):
-    entities = json['request']['entities']
-    return entities
-
-
 def get_answered_word(req):
     word = list()
     word.append(req['request']['command'])
